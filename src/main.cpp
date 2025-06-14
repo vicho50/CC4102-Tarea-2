@@ -3,7 +3,8 @@
 #include <chrono>
 #include <fstream>
 #include "grafo.h"
-#include "union_find.h"
+#include "union_find_not_optimized.h"
+#include "union_find_optimized.h"
 #include "kruskal.h"
 #include "graph_generator.h"
 
@@ -20,7 +21,7 @@ void pruebas_grafo() {
 }
 
 void pruebas_union_find() {
-    UnionFind uf(3);
+    UnionFindBasico uf(3);
     assert(uf.encontrar(0) == 0);
     assert(uf.encontrar(1) == 1);
     assert(uf.unir(0, 1));
@@ -33,82 +34,59 @@ void pruebas_union_find() {
 int main() {
     std::ofstream resultados("resultados.csv");
     resultados << "n,m,algoritmo,tiempo_ms\n";
-    std::vector<int> ns = {100, 500, 1000, 2000}; // Tamaños de grafo
-    std::vector<double> densidades = {1.5, 2, 3}; // m = densidad * n
+    std::vector<int> ns = {100, 500, 1000, 2000};  // Tamaños de grafo
+    std::vector<double> densidades = {1.5, 2, 3};  // m = densidad * n
 
     for (int n : ns) {
         for (double dens : densidades) {
             int m = static_cast<int>(n * dens);
-            for (int rep = 0; rep < 5; ++rep) { // Repetir 5 veces para cada n y m
-                // Generar grafo aleatorio (vector de aristas)
+            for (int rep = 0; rep < 5; ++rep) {
                 auto edges = generar_grafo(n, m);
-
-                // Construir objeto Grafo con las aristas generadas
                 Grafo g(n);
                 for (const auto& [peso, u, v] : edges) {
                     g.agregarArista(u, v, peso);
                 }
 
-                // Algoritmo 1: Kruskal con arreglo ordenado
-                auto start1 = std::chrono::high_resolution_clock::now();
+                // Variante 1: arreglo ordenado + Union-Find sin optimizar
+                auto t1 = std::chrono::high_resolution_clock::now();
                 auto [peso1, mst1] = kruskal_ordenado(g);
-                auto end1 = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double, std::milli> dur1 = end1 - start1;
-                resultados << n << "," << m << ",arreglo," << dur1.count() << "\n";
+                auto t2 = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> d1 = t2 - t1;
+                resultados << n << "," << m << ",arreglo_no_opt," << d1.count() << "\n";
 
-                // Algoritmo 2: Kruskal con heap
-                auto start2 = std::chrono::high_resolution_clock::now();
+                // Variante 2: heap clásico + Union-Find sin optimizar
+                auto t3 = std::chrono::high_resolution_clock::now();
                 auto [peso2, mst2] = kruskal_heap(g);
-                auto end2 = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double, std::milli> dur2 = end2 - start2;
-                resultados << n << "," << m << ",heap," << dur2.count() << "\n";
+                auto t4 = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> d2 = t4 - t3;
+                resultados << n << "," << m << ",heap_no_opt," << d2.count() << "\n";
+
+                // Variante 3: arreglo ordenado + Union-Find con optimización)
+                auto t5 = std::chrono::high_resolution_clock::now();
+                auto [peso3, mst3] = kruskal_ordenado_opt(g);
+                auto t6 = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> d3 = t6 - t5;
+                resultados << n << "," << m << ",arreglo_opt," << d3.count() << "\n";
+
+                // Variante 4: heap clásico + Union-Find con optimización
+                auto t7 = std::chrono::high_resolution_clock::now();
+                auto [peso4, mst4] = kruskal_heap_opt(g);
+                auto t8 = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> d4 = t8 - t7;
+                resultados << n << "," << m << ",heap_opt," << d4.count() << "\n";
             }
         }
     }
     resultados.close();
 
-    std::cout << "Ejemplo de uso de Grafo:\n";
-    Grafo g(4);
-    g.agregarArista(0, 1, 10);
-    g.agregarArista(1, 2, 6);
-    g.agregarArista(0, 2, 5);
+    std::cout << "Experimentos completados. Resultados en 'resultados.csv'.\n";
 
-    for (auto [u, v, peso] : g.obtenerAristas()) {
-        std::cout << u << " - " << v << " (peso: " << peso << ")\n";
-    }
-
-    std::cout << "\nEjemplo de uso de Union-Find:\n";
-    UnionFind uf(g.numVertices());
-    for (auto [u, v, peso] : g.obtenerAristas()) {
-        if (uf.unir(u, v))
-            std::cout << "Unidos: " << u << " y " << v << "\n";
-        else
-            std::cout << "Ya conectados: " << u << " y " << v << "\n";
-    }
-
-    std::cout << "\nKruskal (arreglo ordenado):\n";
-    auto [peso1, mst1] = kruskal_ordenado(g);
-    for (auto [u, v, peso] : mst1)
-        std::cout << u << " - " << v << " (peso: " << peso << ")\n";
-    std::cout << "Peso total: " << peso1 << "\n";
-
-    std::cout << "\nKruskal (heap clásico):\n";
-    auto [peso2, mst2] = kruskal_heap(g);
-    for (auto [u, v, peso] : mst2)
-        std::cout << u << " - " << v << " (peso: " << peso << ")\n";
-    std::cout << "Peso total: " << peso2 << "\n";
-
-    // Medir tiempo de ejecución
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> duracion = end - start;
-    std::cout << "Tiempo: " << duracion.count() << " ms" << std::endl;
-
-    // Ejecutar pruebas automáticas
+    // Ejecutar pruebas
     std::cout << "\nEjecutando pruebas automáticas...\n";
     pruebas_grafo();
     pruebas_union_find();
-
     std::cout << "Todas las pruebas pasaron correctamente.\n";
+
     return 0;
 }
+

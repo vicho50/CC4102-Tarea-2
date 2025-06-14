@@ -1,6 +1,6 @@
-#include "union_find.h"
+#include "union_find_not_optimized.h"
 
-// Constructor de la clase UnionFind no optimizada.
+// Implementación de Union-Find no optimizada.
 // Inicialmente, tenemos una la estructura con 'n' elementos, cada uno en su propio conjunto, 
 // donde se le asigna a cada elemento como su propio padre (raíz del árbol),
 // y se inicializa el tamaño de cada conjunto en 1 (todos los elementos están separados al inicio, árboles de tamaño 1)

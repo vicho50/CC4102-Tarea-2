@@ -1,10 +1,10 @@
-#include "union_find.h"
+#include "union_find_optimized.h"
 
-// Constructor de la clase UnionFind optimizada.
+// Implementación de Union-Find optimizada.
 // Inicialmente, tenemos una la estructura con 'n' elementos, cada uno en su propio conjunto, 
 // donde se le asigna a cada elemento como su propio padre (raíz del árbol),
 // y se inicializa el tamaño de cada conjunto en 1 (todos los elementos están separados al inicio, árboles de tamaño 1)
-UnionFind::UnionFind(int n) : padre(n), rango(n, 0) {
+UnionFindOpt::UnionFindOpt(int n) : padre(n), rango(n, 0) {
     for (int i = 0; i < n; ++i) 
         padre[i] = i;
 }
@@ -14,14 +14,14 @@ UnionFind::UnionFind(int n) : padre(n), rango(n, 0) {
 // En este caso, se realiza una optimización en esta función, para que todos los nodos 
 // que se visitan durante esta búsqueda apunten directamente a la raíz,
 // reduciendo el tiempo en futuras búsquedas.
-int UnionFind::encontrar(int x) {
+int UnionFindOpt::encontrar(int x) {
     if (padre[x] != x)
         padre[x] = encontrar(padre[x]);
     return padre[x];
 }
 
 // unir(x,y): une los árboles de x e y, haciendo que la raíz del árbol más pequeño apunte a la del más grande
-bool UnionFind::unir(int x, int y) {
+bool UnionFindOpt::unir(int x, int y) {
     int xr = encontrar(x);
     int yr = encontrar(y);
     if (xr == yr) 
