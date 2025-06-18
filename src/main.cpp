@@ -21,7 +21,7 @@ void pruebas_grafo() {
 }
 
 void pruebas_union_find() {
-    UnionFindBasico uf(3);
+    UnionFind uf(3);
     assert(uf.encontrar(0) == 0);
     assert(uf.encontrar(1) == 1);
     assert(uf.unir(0, 1));

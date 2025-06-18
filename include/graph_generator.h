@@ -2,6 +2,7 @@
 #include <tuple>
 #include <random>
 #include <set>
+#include <algorithm>
 
 using Edge = std::tuple<int, int, int>; // (peso, nodo1, nodo2)
 

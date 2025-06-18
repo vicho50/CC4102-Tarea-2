@@ -3,7 +3,7 @@
 // Implementación de Union-Find optimizada.
 // Inicialmente, tenemos una la estructura con 'n' elementos, cada uno en su propio conjunto, 
 // donde se le asigna a cada elemento como su propio padre (raíz del árbol),
-// y se inicializa el tamaño de cada conjunto en 1 (todos los elementos están separados al inicio, árboles de tamaño 1)
+// y se inicializa el rango de cada conjunto en 1 (todos los elementos están separados al inicio, árboles de rango 1)
 UnionFindOpt::UnionFindOpt(int n) : padre(n), rango(n, 0) {
     for (int i = 0; i < n; ++i) 
         padre[i] = i;
@@ -26,12 +26,12 @@ bool UnionFindOpt::unir(int x, int y) {
     int yr = encontrar(y);
     if (xr == yr) 
         return false;
-    if (tamaño[xr] < tamaño[yr]) {
+    if (rango[xr] < rango[yr]) {
         padre[xr] = yr;
-        tamaño[yr] += tamaño[xr];
+        rango[yr] += rango[xr];
     } else {
         padre[yr] = xr;
-        tamaño[xr] += tamaño[yr];
+        rango[xr] += rango[yr];
     }
     return true;
 }
